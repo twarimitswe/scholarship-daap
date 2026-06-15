@@ -1,4 +1,4 @@
-const contractAddress = "0xDE3A9Bc278fd7FFc5911e4e7Bc8560B1e9901B12";
+const contractAddress = "0x4520e7445378a291dD0cFC3F50DAD1B8d75F6259";
 const contractABI = [
     {
         "inputs": [],
@@ -184,20 +184,25 @@ async function connectWallet() {
     web3 = new Web3(window.ethereum);
     try {
         accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-        document.getElementById('account').innerText = `✅ Connected: ${accounts[0]}`;
+        document.getElementById('account').innerText = `Connected: ${accounts[0]}`;
 
-        // Fix #13: Warn if connected to a public/wrong network
-        const netId = await web3.eth.net.getId();
-        if (KNOWN_PUBLIC_NET_IDS[netId]) {
-            const proceed = confirm(
-                `⚠️ Warning: You are connected to ${KNOWN_PUBLIC_NET_IDS[netId]} (ID: ${netId}).\n` +
-                "This DApp is intended for a local Ganache network.\n\n" +
-                "Press OK to continue anyway, or Cancel to abort."
-            );
-            if (!proceed) return;
-        }
-
+        // Instantiate contract immediately — don't let the network check block this
         contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        // Fix #13: Network warning — wrapped in its own try/catch so a
+        // failed net.getId() call can't prevent the contract from being usable
+        try {
+            const netId = await web3.eth.net.getId();
+            if (KNOWN_PUBLIC_NET_IDS[netId]) {
+                confirm(
+                    `Warning: You are connected to ${KNOWN_PUBLIC_NET_IDS[netId]} (ID: ${netId}).\n` +
+                    "This DApp is intended for a local Ganache network.\n\n" +
+                    "Press OK to continue anyway."
+                );
+            }
+        } catch (netErr) {
+            console.warn("Could not determine network ID:", netErr);
+        }
 
         // Fix #12: Show balance immediately after connecting
         await refreshBalance();
@@ -205,7 +210,7 @@ async function connectWallet() {
         // Fix #14: Update state if user switches accounts in MetaMask
         window.ethereum.on('accountsChanged', async (newAccounts) => {
             accounts = newAccounts;
-            document.getElementById('account').innerText = `✅ Connected: ${accounts[0]}`;
+            document.getElementById('account').innerText = ` Connected: ${accounts[0]}`;
             await refreshBalance();
         });
 
@@ -216,14 +221,15 @@ async function connectWallet() {
         });
 
     } catch (error) {
-        console.error("User denied account access", error);
+        console.error("Wallet connection failed:", error);
         alert("Wallet connection failed: " + error.message);
     }
 }
 
-// Fix #9: Guard helper — check wallet is connected before any transaction
+// Fix #9: Guard helper — only checks web3 + accounts, not contract,
+// since contract is now guaranteed to be set right after account fetch
 function requireWallet() {
-    if (!contract || !accounts || !accounts[0]) {
+    if (!web3 || !accounts || !accounts[0]) {
         alert("Please connect your wallet first by clicking 'Connect Wallet'.");
         return false;
     }
@@ -252,7 +258,7 @@ async function donate() {
             from: accounts[0],
             value: weiValue
         });
-        alert("✅ Donation successful! Thank you.");
+        alert(" Donation successful! Thank you.");
         document.getElementById('donationAmount').value = '';
         await refreshBalance(); // Fix #12: update balance after donation
     } catch (error) {
@@ -266,7 +272,7 @@ async function applyForScholarship() {
 
     try {
         await contract.methods.applyForScholarship().send({ from: accounts[0] });
-        alert("✅ Scholarship application submitted successfully!");
+        alert(" Scholarship application submitted successfully!");
     } catch (error) {
         console.error("Application failed", error);
         // Provide readable message for common revert
@@ -309,7 +315,7 @@ async function releaseFunds() {
 
     try {
         await contract.methods.releaseFunds(recipient, amount).send({ from: accounts[0] });
-        alert(`✅ ${amountInput} ETH successfully released to ${recipient}`);
+        alert(` ${amountInput} ETH successfully released to ${recipient}`);
         document.getElementById('recipientAddress').value = '';
         document.getElementById('releaseAmount').value = '';
         await refreshBalance(); // Fix #12: update balance after release
