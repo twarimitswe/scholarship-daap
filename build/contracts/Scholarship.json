@@ -5168,10 +5168,16 @@
       "links": {},
       "address": "0xDE3A9Bc278fd7FFc5911e4e7Bc8560B1e9901B12",
       "transactionHash": "0xdb281da757b558236fb1ed6d75f9a5ba452d17b61088c81317e41eeece1c55d5"
+    },
+    "1781522044459": {
+      "events": {},
+      "links": {},
+      "address": "0x4520e7445378a291dD0cFC3F50DAD1B8d75F6259",
+      "transactionHash": "0xa66847e6910b8000f531814ed47e367a240c4b4cf4fa7503d916a3ab348c321e"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2026-06-08T19:51:47.786Z",
+  "updatedAt": "2026-06-15T11:40:41.375Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
