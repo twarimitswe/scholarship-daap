@@ -52,6 +52,7 @@
     <h1>Decentralized Scholarship Funding</h1>
     <button onclick="connectWallet()">Connect Wallet</button>
     <p id="account"></p>
+    <p id="balance" style="font-weight:bold; color:#1e90ff;"></p>
     <div class="section">
         <h2>Donate ETH</h2>
         <input type="text" id="donationAmount" placeholder="Amount in ETH">
@@ -64,6 +65,7 @@
     <div class="section">
         <h2>Release Funds (Admin ONLY)</h2>
         <input type="text" id="recipientAddress" placeholder="Recipient Address">
+        <input type="text" id="releaseAmount" placeholder="Amount in ETH">
         <button onclick="releaseFunds()">Release</button>
     </div>
 </body>
